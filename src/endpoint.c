@@ -12,32 +12,16 @@
 
 static const char *TAG = "endpoint";
 
-static void parse_command(const char *payload, coap_pdu_t* response) {
-  cJSON *json = cJSON_Parse(payload);
-  cJSON *id = cJSON_GetObjectItem(json, "id");
-  cJSON *method = cJSON_GetObjectItem(json, "method");
-  cJSON *arguments = cJSON_GetObjectItem(json, "arguments");
-
-  if (id->type == cJSON_Number) {
-    ESP_LOGI(TAG, "id=%i\n", id->valueint);
-  }
-  if (method->type == cJSON_String && method->valuestring != NULL) {
-    ESP_LOGI(TAG, "method=%s\n", method->valuestring);
-  }
-  if (arguments->type == cJSON_Array) {
-    ESP_LOGI(TAG, "arguments.size=%i\n", cJSON_GetArraySize(arguments));
-  }
-}
-
 static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *resource,
                                 const coap_endpoint_t *local_interface, coap_address_t *peer,
                                 coap_pdu_t *request, str *token, coap_pdu_t *response) {
+  ESP_LOGI(TAG, "hnd_roomba_cmd_post entered\n");
+
   size_t size;
   unsigned char *data;
 
   coap_get_data(request, &size, &data);
 
-  //parse_command((const char *) data, response);
   cJSON *json = cJSON_Parse((const char *) data);
   cJSON *id = cJSON_GetObjectItem(json, "id");
 
@@ -51,25 +35,37 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *res
     cJSON_AddBoolToObject(obj, "successful", true);
   }
 
-  const char *response_data = cJSON_Print(obj);
+  char *response_data = cJSON_Print(obj);
+
+  cJSON_Delete(json);
 
   unsigned char buf[3];
   coap_add_option(response, COAP_OPTION_CONTENT_TYPE,
                   coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_JSON), buf);
   coap_add_data(response, strlen(response_data), (const unsigned char *) response_data);
   coap_send(ctx, local_interface, peer, response);
+
+  free(response_data);
+  cJSON_Delete(obj);
 }
 
 static void hnd_roomba_cmd_get(coap_context_t *ctx, struct coap_resource_t *resource,
                                const coap_endpoint_t *local_interface, coap_address_t *peer,
                                coap_pdu_t *request, str *token, coap_pdu_t *response) {
+  ESP_LOGI(TAG, "hnd_roomba_cmd_get entered\n");
+
   unsigned char buf[3];
-  const char *response_data = "{\"message\": \"use post to send commands\"}";
+  cJSON *obj = cJSON_CreateObject();
+  cJSON_AddStringToObject(obj, "message", "use post to send commands");
+  char *response_data = cJSON_Print(obj);
 
   coap_add_option(response, COAP_OPTION_CONTENT_TYPE,
                   coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_JSON), buf);
   coap_add_data(response, strlen(response_data), (const unsigned char *) response_data);
   coap_send(ctx, local_interface, peer, response);
+
+  free(response_data);
+  cJSON_Delete(obj);
 }
 
 void endpoint_task(void *pvParameter) {
