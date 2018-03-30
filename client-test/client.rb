@@ -3,14 +3,27 @@
 require 'coap'
 require 'json'
 
-obj = {
-  id: 1,
-  method: "test/cmd",
-  arguments: []
-}
+class Roomba 
+  def initialize(address)
+    @address = address
+    @client = CoAP::Client.new(host: '192.168.1.110')
+  end
 
-c = CoAP::Client.new(host: '192.168.1.110')
-p c.get('/roomba/cmd')
-out = c.post('/roomba/cmd', nil, nil, obj.to_json)
-p out 
-puts out.payload
+  def start 
+    send_cmd('start')
+  end
+
+  private
+  def send_cmd(cmd) 
+    obj = {
+      id: 1,
+      method: cmd,
+      arguments: []
+    }
+    @client.post('/roomba/cmd', nil, nil, obj.to_json)
+  end
+end
+
+
+roomba = Roomba.new('192.168.1.110')
+p roomba.start.payload
