@@ -1,3 +1,4 @@
+#include <stdbool.h>
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>
@@ -9,8 +10,20 @@
 
 #include "endpoint.h"
 #include "wifi.h"
+#include "roomba.h"
 
 static const char *TAG = "endpoint";
+
+bool command_map(const char* cmd) {
+  if (strcmp(cmd, "start") == 0) {
+    send_roomba_cmd(OP_START);
+  } else {
+    ESP_LOGI(TAG, "unhandled command: %s\n", cmd);
+    return false;
+  }
+
+  return true;
+}
 
 static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *resource,
                                 const coap_endpoint_t *local_interface, coap_address_t *peer,
@@ -24,6 +37,7 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *res
 
   cJSON *json = cJSON_Parse((const char *) data);
   cJSON *id = cJSON_GetObjectItem(json, "id");
+  cJSON *method = cJSON_GetObjectItem(json, "message");
 
   cJSON *obj = cJSON_CreateObject();
 
@@ -31,8 +45,16 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *res
     ESP_LOGI(TAG, "id=%i\n", id->valueint);
 
     cJSON_AddNumberToObject(obj, "id", id->valueint);
-    cJSON_AddStringToObject(obj, "message", "ok");
-    cJSON_AddBoolToObject(obj, "successful", true);
+  }
+
+  if (method->type == cJSON_String && method->valuestring != NULL) {
+    ESP_LOGI(TAG, "method=%s\n", method->valuestring);
+    if (command_map(method->valuestring)) {
+      cJSON_AddStringToObject(obj, "message", "ok");
+      cJSON_AddBoolToObject(obj, "successful", true);
+    } else {
+      cJSON_AddStringToObject(obj, "message", "command not found");
+    }
   }
 
   char *response_data = cJSON_Print(obj);
