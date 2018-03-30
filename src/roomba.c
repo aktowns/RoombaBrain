@@ -4,10 +4,11 @@
 #include <freertos/FreeRTOS.h>
 #include <driver/uart.h>
 #include <esp_log.h>
+#include <driver/gpio.h>
 
 #include "roomba.h"
 
-#define ROOMBA_UART UART_NUM_1
+#define ROOMBA_UART UART_NUM_0
 #define BUF_SIZE 1024
 
 static const char *TAG = "roomba";
@@ -49,7 +50,7 @@ const opcode_t opcodes[255] = {
 void roomba_uart_task(void *pvParameters) {
   uart_event_t event;
   size_t buffered_size;
-  uint8_t* dtmp = (uint8_t*)malloc(BUF_SIZE);
+  //uint8_t* dtmp = (uint8_t*)malloc(BUF_SIZE);
 
   for (;;) {
     if (xQueueReceive(roomba_queue, (void*)&event, (portTickType)portMAX_DELAY)) {
@@ -85,8 +86,8 @@ void roomba_uart_task(void *pvParameters) {
       }
     }
   }
-  free(dtmp);
-  dtmp = NULL;
+  //free(dtmp);
+  //dtmp = NULL;
   vTaskDelete(NULL);
 }
 
@@ -100,6 +101,7 @@ void roomba_init() {
       .rx_flow_ctrl_thresh = 122
   };
 
+  uart_set_pin(ROOMBA_UART, GPIO_NUM_36, GPIO_NUM_39, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
   uart_param_config(ROOMBA_UART, &uart_config);
   uart_driver_install(ROOMBA_UART, BUF_SIZE * 2, BUF_SIZE * 2, 10, &roomba_queue, 0);
   xTaskCreate(roomba_uart_task, "roomba_uart_task", 2048, (void*)ROOMBA_UART, 12, NULL);
