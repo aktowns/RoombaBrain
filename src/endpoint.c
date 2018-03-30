@@ -12,9 +12,7 @@
 
 static const char *TAG = "endpoint";
 
-static coap_async_state_t *async = NULL;
-
-static void parse_command(const char *payload) {
+static void parse_command(const char *payload, coap_pdu_t* response) {
   cJSON *json = cJSON_Parse(payload);
   cJSON *id = cJSON_GetObjectItem(json, "id");
   cJSON *method = cJSON_GetObjectItem(json, "method");
@@ -39,43 +37,39 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *res
 
   coap_get_data(request, &size, &data);
 
-  parse_command((const char *) data);
+  //parse_command((const char *) data, response);
+  cJSON *json = cJSON_Parse((const char *) data);
+  cJSON *id = cJSON_GetObjectItem(json, "id");
 
+  cJSON *obj = cJSON_CreateObject();
 
-}
+  if (id->type == cJSON_Number) {
+    ESP_LOGI(TAG, "id=%i\n", id->valueint);
 
-static void send_async_response(coap_context_t *ctx, const coap_endpoint_t *local_if) {
-  coap_pdu_t *response;
-  unsigned char buf[3];
-  const char *response_data = "Hello World!";
-  size_t size = sizeof(coap_hdr_t) + 20;
-
-  response = coap_pdu_init((unsigned char) (async->flags & COAP_MESSAGE_CON),
-                           COAP_RESPONSE_CODE(205), 0, size);
-  response->hdr->id = coap_new_message_id(ctx);
-  if (async->tokenlen) {
-    coap_add_token(response, async->tokenlen, async->token);
+    cJSON_AddNumberToObject(obj, "id", id->valueint);
+    cJSON_AddStringToObject(obj, "message", "ok");
+    cJSON_AddBoolToObject(obj, "successful", true);
   }
+
+  const char *response_data = cJSON_Print(obj);
+
+  unsigned char buf[3];
   coap_add_option(response, COAP_OPTION_CONTENT_TYPE,
                   coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_JSON), buf);
-  coap_add_data(response, strlen(response_data), (unsigned char *) response_data);
-
-  if (coap_send(ctx, local_if, &async->peer, response) == COAP_INVALID_TID) {
-
-  }
-
-  coap_delete_pdu(response);
-  coap_async_state_t *tmp;
-  coap_remove_async(ctx, async->id, &tmp);
-  coap_free_async(async);
-  async = NULL;
+  coap_add_data(response, strlen(response_data), (const unsigned char *) response_data);
+  coap_send(ctx, local_interface, peer, response);
 }
 
-static void async_handler(coap_context_t *ctx, struct coap_resource_t *resource,
-                          const coap_endpoint_t *local_interface, coap_address_t *peer,
-                          coap_pdu_t *request, str *token, coap_pdu_t *response) {
-  async = coap_register_async(ctx, peer, request, COAP_ASYNC_SEPARATE | COAP_ASYNC_CONFIRM,
-                              (void *) "no data");
+static void hnd_roomba_cmd_get(coap_context_t *ctx, struct coap_resource_t *resource,
+                               const coap_endpoint_t *local_interface, coap_address_t *peer,
+                               coap_pdu_t *request, str *token, coap_pdu_t *response) {
+  unsigned char buf[3];
+  const char *response_data = "{\"message\": \"use post to send commands\"}";
+
+  coap_add_option(response, COAP_OPTION_CONTENT_TYPE,
+                  coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_JSON), buf);
+  coap_add_data(response, strlen(response_data), (const unsigned char *) response_data);
+  coap_send(ctx, local_interface, peer, response);
 }
 
 void endpoint_task(void *pvParameter) {
@@ -103,7 +97,7 @@ void endpoint_task(void *pvParameter) {
       tv.tv_sec = 5;
 
       coap_resource_t *resource = coap_resource_init((unsigned char *) "roomba/cmd", 10, 0);
-      coap_register_handler(resource, COAP_REQUEST_GET, async_handler);
+      coap_register_handler(resource, COAP_REQUEST_GET, hnd_roomba_cmd_get);
       coap_register_handler(resource, COAP_REQUEST_POST, hnd_roomba_cmd_post);
       coap_add_resource(ctx, resource);
 
@@ -120,11 +114,6 @@ void endpoint_task(void *pvParameter) {
           } else if (result < 0) {
             break;
           } else {
-            ESP_LOGE(TAG, "select timeout");
-          }
-
-          if (async) {
-            send_async_response(ctx, ctx->endpoint);
           }
         }
       }
