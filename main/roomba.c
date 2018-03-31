@@ -94,7 +94,7 @@ void roomba_uart_task(void *pvParameters) {
 
 void roomba_init() {
   uart_config_t uart_config = {
-      .baud_rate = 9600,
+      .baud_rate = 115200,
       .data_bits = UART_DATA_8_BITS,
       .parity    = UART_PARITY_DISABLE,
       .stop_bits = UART_STOP_BITS_1,
@@ -104,25 +104,25 @@ void roomba_init() {
   uart_param_config(ROOMBA_UART, &uart_config);
   gpio_set_direction(GPIO_NUM_26, GPIO_MODE_OUTPUT);
   uart_set_pin(ROOMBA_UART, GPIO_NUM_26, GPIO_NUM_27, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
-  uart_driver_install(ROOMBA_UART, BUF_SIZE * 2, BUF_SIZE * 2, 10, &roomba_queue, 0);
+  uart_driver_install(ROOMBA_UART, BUF_SIZE * 2, 0, 10, NULL, 0);
 
-  while (1) {
-    const char *init = "uart is initialized\n";
-    uart_write_bytes(ROOMBA_UART, init, 20);
-    uart_flush(ROOMBA_UART);
-    vTaskDelay(500 / portTICK_PERIOD_MS);
-    ESP_LOGI(TAG, "Looping");
-  }
-
-  xTaskCreate(roomba_uart_task, "roomba_uart_task", 2048, (void*)ROOMBA_UART, 12, NULL);
+  //xTaskCreate(roomba_uart_task, "roomba_uart_task", 2048, (void*)ROOMBA_UART, 12, NULL);
 }
 
 void send_roomba_cmd(roomba_opcode_t op, ...) {
   va_list ap;
 
   ESP_LOGI(TAG, "Sending command %s to roomba\n", opcodes[op].description);
-
+  //if (op == OP_DIGIT_LEDS_ASCII) {
+  //  uart_write_bytes(ROOMBA_UART, (const char *) &(opcodes[OP_FULL].opcode), 1);
+  //  vTaskDelay(1000 / portTICK_PERIOD_MS);
+  //}
   uart_write_bytes(ROOMBA_UART, ((const char*)&opcodes[op].opcode), 1);
+
+  if (op == OP_DIGIT_LEDS_ASCII) {
+    uart_write_bytes(ROOMBA_UART, "\x72\x73\x72\x73", 4);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  }
 
   va_start(ap, op);
 

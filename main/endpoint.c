@@ -8,6 +8,9 @@
 #include <esp_log.h>
 #include <cJSON.h>
 
+#include <lwip/sys.h>
+#include <lwip/err.h>
+
 #include "endpoint.h"
 #include "wifi.h"
 #include "roomba.h"
@@ -17,6 +20,12 @@ static const char *TAG = "endpoint";
 bool command_map(const char* cmd) {
   if (strcmp(cmd, "start") == 0) {
     send_roomba_cmd(OP_START);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    send_roomba_cmd(OP_SAFE);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+    send_roomba_cmd(OP_DIGIT_LEDS_ASCII);
   } else {
     ESP_LOGI(TAG, "unhandled command: %s\n", cmd);
     return false;
