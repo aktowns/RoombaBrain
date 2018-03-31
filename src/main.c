@@ -46,8 +46,8 @@ void app_main() {
 
   ESP_LOGI(TAG, "booting esp");
 
-  wifi_init_sta();
   roomba_init();
+  wifi_init_sta();
 
   xTaskCreate(&endpoint_task, "coap", 2048, NULL, 5, NULL);
 }

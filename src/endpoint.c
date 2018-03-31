@@ -37,7 +37,7 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *res
 
   cJSON *json = cJSON_Parse((const char *) data);
   cJSON *id = cJSON_GetObjectItem(json, "id");
-  cJSON *method = cJSON_GetObjectItem(json, "message");
+  cJSON *method = cJSON_GetObjectItem(json, "method");
 
   cJSON *obj = cJSON_CreateObject();
 

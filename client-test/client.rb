@@ -10,6 +10,7 @@ class Roomba
   end
 
   def start 
+    p @client.get('/roomba/cmd')
     send_cmd('start')
   end
 
