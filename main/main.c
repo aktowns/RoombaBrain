@@ -24,7 +24,7 @@ Smallish ESP32 CoAP Server that wraps most roomba 760 opcodes.
 #include <lwip/err.h>
 #include <lwip/sys.h>
 
-#include <coap.h>
+#include <coap/coap.h>
 
 #include <driver/gpio.h>
 #include <driver/uart.h>
@@ -49,5 +49,5 @@ void app_main() {
   roomba_init();
   wifi_init_sta();
 
-  xTaskCreate(&endpoint_task, "coap", 2048, NULL, 5, NULL);
+  xTaskCreate(&endpoint_task, "coap", 4096, NULL, 5, NULL);
 }

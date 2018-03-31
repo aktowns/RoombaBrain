@@ -2,6 +2,5 @@
 .piolibdeps
 .vscode
 .idea
-CMakeListsPrivate.txt
-CMakeLists.txt
+CMakeListsGenerated.txt
 cmake-build-debug
