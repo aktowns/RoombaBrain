@@ -1,0 +1,226 @@
+syntax = "proto3";
+
+message CmdResponse {}
+
+message StartRequest {}
+message BaudRequest {
+    enum BaudRate {
+        BAUD_300 = 0;
+        BAUD_600 = 1;
+        BAUD_1200 = 2;
+        BAUD_2400 = 3;
+        BAUD_4800 = 4;
+        BAUD_9600 = 5;
+        BAUD_14400 = 6;
+        BAUD_19200 = 7;
+        BAUD_28800 = 8;
+        BAUD_38400 = 9;
+        BAUD_57600 = 10;
+        BAUD_115200 = 11;
+    }
+    BaudRate rate = 1;
+}
+
+message ModeRequest {
+    enum Mode {
+        SAFE = 0;
+        FULL = 1;
+    }
+    Mode mode = 1;
+}
+
+message CleanRequest {
+    enum CleanMode {
+        CLEAN = 0;
+        MAX = 1;
+        SPOT = 2;
+        DOCK = 3;
+    }
+    CleanMode mode = 1;
+}
+
+message ScheduleRequest {
+    message Day {
+       uint32 hour = 1;
+       uint32 minute = 2;
+    }
+
+    Day sunday = 1;
+    Day monday = 2;
+    Day tuesday = 3;
+    Day wednesday = 4;
+    Day thursday = 5;
+    Day friday = 6;
+    Day saturday = 7;
+}
+
+message SetTimeRequest {
+    enum Day {
+        Sunday = 0;
+        Monday = 1;
+        Tuesday = 2;
+        Wednesday = 3;
+        Thursday = 4;
+        Friday = 5;
+        Saturday = 6;
+    }
+    Day day = 1;
+    uint32 hour = 2;
+    uint32 minute = 3;
+}
+
+message PowerRequest {}
+
+service Roomba {
+    rpc Start(StartRequest) returns (CmdResponse);
+    rpc Baud(BaudRequest) returns (CmdResponse);
+    rpc Mode(ModeRequest) returns (CmdResponse);
+    rpc Clean(CleanRequest) returns (CmdResponse);
+    rpc Schedule(ScheduleRequest) returns (CmdResponse);
+    rpc SetTime(SetTimeRequest) returns (CmdResponse);
+    rpc Power(PowerRequest) returns (CmdResponse);
+}
+
+message DriveRequest {
+    uint32 velocity = 1;
+    uint32 radius = 2;
+}
+
+message DriveDirectRequest {
+    uint32 right_velocity = 1;
+    uint32 left_velocity = 2;
+}
+
+message DrivePWMRequest {
+    uint32 right_pwm = 1;
+    uint32 left_pwm = 2;
+}
+
+message MotorsRequest {
+    enum SideBrushDirection {
+        CLOCKWISE = 0;
+        COUNTERCLOCKWISE = 1;
+    }
+    enum MainBrushDirection {
+        INWARD = 0;
+        OUTWARD = 1;
+    }
+    enum MotorState {
+        ON = 0;
+        OFF = 1;
+    }
+    SideBrushDirection side_brush_direction = 1;
+    MainBrushDirection main_brush_direction = 2;
+    MotorState side_brush = 3;
+    MotorState vacuum = 4;
+    MotorState main_brush = 5;
+}
+
+message MotorsPWMRequest {
+    uint32 main_brush_pwm = 1;
+    uint32 side_brush_pwm = 2;
+    uint32 vacuum_pwm = 3;
+}
+
+message LEDsRequest {
+    enum CommonLedState {
+        ON = 0;
+        OFF = 1;
+    }
+
+    CommonLedState debris = 1;
+    CommonLedState spot   = 2;
+    CommonLedState dock   = 3;
+    CommonLedState check_robot = 4;
+    uint32 clean_power_colour = 5;
+    uint32 clean_power_intensity = 6;
+}
+
+message SchedulingLEDsRequest {
+    enum LedState {
+        ON = 0;
+        OFF = 1;
+    }
+    LedState saturday = 1;
+    LedState sunday = 2;
+    LedState monday = 3;
+    LedState tuesday = 4;
+    LedState wednesday = 5;
+    LedState thursday = 6;
+    LedState friday = 7;
+    LedState schedule = 8;
+    LedState clock = 9;
+    LedState am = 10;
+    LedState pm = 11;
+    LedState colon = 12;
+}
+
+message DigitLEDsRequest {
+    enum LedState {
+        ON = 0;
+        OFF = 1;
+    }
+    message LedSegment {
+        LedState top = 1;
+        LedState top_left = 2;
+        LedState top_right = 3;
+        LedState middle = 4;
+        LedState bottom_left = 5;
+        LedState bottom_right = 6;
+        LedState bottom = 7;
+    }
+
+    LedSegment one = 1;
+    LedSegment two = 2;
+    LedSegment three = 3;
+    LedSegment four = 4;
+}
+
+message DigitLEDsAsciiRequest {
+    string message = 1;
+}
+
+message ButtonsRequest {
+    enum ButtonState {
+        PUSH = 0;
+        RELEASE = 1;
+    }
+
+    ButtonState clean = 1;
+    ButtonState spot = 2;
+    ButtonState dock = 3;
+    ButtonState minute = 4;
+    ButtonState hour = 5;
+    ButtonState day = 6;
+    ButtonState schedule = 7;
+    ButtonState clock = 8;
+}
+
+message SongRequest {
+    message Note {
+        uint32 number = 1;
+        uint32 duration = 2;
+    }
+    uint32 song_number = 1;
+    repeated Note notes = 2;
+}
+
+message PlayRequest {
+    uint32 song_number = 1;
+}
+
+service Actuator {
+    rpc Drive(DriveRequest) returns (CmdResponse);
+    rpc DriveDirect(DriveDirectRequest) returns (CmdResponse);
+    rpc DrivePWM(DrivePWMRequest) returns (CmdResponse);
+    rpc Motors(MotorsRequest) returns (CmdResponse);
+    rpc MotorsPWM(MotorsPWMRequest) returns (CmdResponse);
+    rpc LEDs(LEDsRequest) returns (CmdResponse);
+    rpc SchedulingLEDs(SchedulingLEDsRequest) returns (CmdResponse);
+    rpc DigitLEDsRaw(DigitLEDsRequest) returns (CmdResponse);
+    rpc DigitLEDsAscii(DigitLEDsAsciiRequest) returns (CmdResponse);
+    rpc Buttons(ButtonsRequest) returns (CmdResponse);
+    rpc Song(SongRequest) returns (CmdResponse);
+    rpc Play(PlayRequest) returns (CmdResponse);
+}
+
