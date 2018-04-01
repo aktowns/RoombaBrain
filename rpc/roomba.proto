@@ -1,6 +1,9 @@
 syntax = "proto3";
 
-message CmdResponse {}
+message CmdResponse {
+    uint32 id = 1;
+    string result = 2;
+}
 
 message StartRequest {}
 message BaudRequest {
@@ -71,14 +74,25 @@ message SetTimeRequest {
 
 message PowerRequest {}
 
-service Roomba {
-    rpc Start(StartRequest) returns (CmdResponse);
-    rpc Baud(BaudRequest) returns (CmdResponse);
-    rpc Mode(ModeRequest) returns (CmdResponse);
-    rpc Clean(CleanRequest) returns (CmdResponse);
-    rpc Schedule(ScheduleRequest) returns (CmdResponse);
-    rpc SetTime(SetTimeRequest) returns (CmdResponse);
-    rpc Power(PowerRequest) returns (CmdResponse);
+//service Roomba {
+//    rpc Start(StartRequest) returns (CmdResponse);
+//    rpc Baud(BaudRequest) returns (CmdResponse);
+//    rpc Mode(ModeRequest) returns (CmdResponse);
+//    rpc Clean(CleanRequest) returns (CmdResponse);
+//    rpc Schedule(ScheduleRequest) returns (CmdResponse);
+//    rpc SetTime(SetTimeRequest) returns (CmdResponse);
+//    rpc Power(PowerRequest) returns (CmdResponse);
+//}
+message Roomba {
+    oneof request {
+        StartRequest start = 1;
+        BaudRequest baud = 2;
+        ModeRequest mode = 3;
+        CleanRequest clean = 4;
+        ScheduleRequest schedule = 5;
+        SetTimeRequest set_time = 6;
+        PowerRequest power = 7;
+    }
 }
 
 message DriveRequest {
@@ -209,18 +223,42 @@ message PlayRequest {
     uint32 song_number = 1;
 }
 
-service Actuator {
-    rpc Drive(DriveRequest) returns (CmdResponse);
-    rpc DriveDirect(DriveDirectRequest) returns (CmdResponse);
-    rpc DrivePWM(DrivePWMRequest) returns (CmdResponse);
-    rpc Motors(MotorsRequest) returns (CmdResponse);
-    rpc MotorsPWM(MotorsPWMRequest) returns (CmdResponse);
-    rpc LEDs(LEDsRequest) returns (CmdResponse);
-    rpc SchedulingLEDs(SchedulingLEDsRequest) returns (CmdResponse);
-    rpc DigitLEDsRaw(DigitLEDsRequest) returns (CmdResponse);
-    rpc DigitLEDsAscii(DigitLEDsAsciiRequest) returns (CmdResponse);
-    rpc Buttons(ButtonsRequest) returns (CmdResponse);
-    rpc Song(SongRequest) returns (CmdResponse);
-    rpc Play(PlayRequest) returns (CmdResponse);
+// service Actuator {
+//     rpc Drive(DriveRequest) returns (CmdResponse);
+//     rpc DriveDirect(DriveDirectRequest) returns (CmdResponse);
+//     rpc DrivePWM(DrivePWMRequest) returns (CmdResponse);
+//     rpc Motors(MotorsRequest) returns (CmdResponse);
+//     rpc MotorsPWM(MotorsPWMRequest) returns (CmdResponse);
+//     rpc LEDs(LEDsRequest) returns (CmdResponse);
+//     rpc SchedulingLEDs(SchedulingLEDsRequest) returns (CmdResponse);
+//     rpc DigitLEDsRaw(DigitLEDsRequest) returns (CmdResponse);
+//     rpc DigitLEDsAscii(DigitLEDsAsciiRequest) returns (CmdResponse);
+//     rpc Buttons(ButtonsRequest) returns (CmdResponse);
+//     rpc Song(SongRequest) returns (CmdResponse);
+//     rpc Play(PlayRequest) returns (CmdResponse);
+// }
+
+message Actuator {
+    oneof request {
+        DriveRequest drive = 1;
+        DriveDirectRequest direct_drive = 2;
+        DrivePWMRequest drive_pwm = 3;
+        MotorsRequest motors = 4;
+        MotorsPWMRequest motors_pwm = 5;
+        LEDsRequest leds = 6;
+        SchedulingLEDsRequest scheduling_leds = 7;
+        DigitLEDsRequest digital_leds = 8;
+        DigitLEDsAsciiRequest digital_leds_ascii = 9;
+        ButtonsRequest buttons = 10;
+        SongRequest song = 11;
+        PlayRequest play = 12;
+    }
 }
 
+message RPCRequest {
+    uint32 id = 1;
+    oneof request {
+        Roomba roomba = 2;
+        Actuator actuator = 3;
+    }
+}

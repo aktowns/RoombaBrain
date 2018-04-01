@@ -6,7 +6,6 @@
 
 #include <coap.h>
 #include <esp_log.h>
-#include <cJSON.h>
 
 #include <lwip/sys.h>
 #include <lwip/err.h>
@@ -15,23 +14,57 @@
 #include "wifi.h"
 #include "roomba.h"
 
+#include "rpc/roomba.pb.h"
+#include <pb_encode.h>
+#include <pb_decode.h>
+
 static const char *TAG = "endpoint";
 
-bool command_map(const char* cmd) {
-  if (strcmp(cmd, "start") == 0) {
-    send_roomba_cmd(OP_START);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-    send_roomba_cmd(OP_SAFE);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
-
-    send_roomba_cmd(OP_DIGIT_LEDS_ASCII);
-  } else {
-    ESP_LOGI(TAG, "unhandled command: %s\n", cmd);
-    return false;
+void handle_rpc_roomba_mode(ModeRequest *mode) {
+  switch (mode->mode) {
+    case ModeRequest_Mode_FULL:
+      send_roomba_cmd(OP_FULL, 0);
+    case ModeRequest_Mode_SAFE:
+      send_roomba_cmd(OP_SAFE, 0);
   }
+}
 
-  return true;
+void handle_rpc_roomba(Roomba* roomba) {
+  switch (roomba->which_request) {
+    case Roomba_mode_tag:
+      handle_rpc_roomba_mode(&roomba->request.mode);
+      break;
+    case Roomba_power_tag:
+      send_roomba_cmd(OP_POWER, 0);
+      break;
+    default:
+      ESP_LOGE(TAG, "Unhandled roomba rpc call: %i", roomba->which_request);
+      break;
+  }
+}
+
+void handle_rpc_actuator(Actuator* actuator) {
+  switch (actuator->which_request) {
+    case Actuator_digital_leds_ascii_tag:
+      break;
+    default:
+      ESP_LOGE(TAG, "Unhandled actuator rpc call: %i", actuator->which_request);
+      break;
+  }
+}
+
+void handle_rpc_request(RPCRequest *rpc_request) {
+  switch (rpc_request->which_request) {
+    case RPCRequest_roomba_tag:
+      handle_rpc_roomba(&rpc_request->request.roomba);
+      break;
+    case RPCRequest_actuator_tag:
+      handle_rpc_actuator(&rpc_request->request.actuator);
+      break;
+    default:
+      ESP_LOGE(TAG, "Unhandled rpc call: %i", rpc_request->which_request);
+      break;
+  }
 }
 
 static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *resource,
@@ -44,40 +77,22 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *res
 
   coap_get_data(request, &size, &data);
 
-  cJSON *json = cJSON_Parse((const char *) data);
-  cJSON *id = cJSON_GetObjectItem(json, "id");
-  cJSON *method = cJSON_GetObjectItem(json, "method");
+  RPCRequest rpc_request = RPCRequest_init_zero;
+  pb_istream_t stream = pb_istream_from_buffer(data, strlen((const char *) data));
+  pb_decode(&stream, RPCRequest_fields, &rpc_request);
+  handle_rpc_request(&rpc_request);
 
-  cJSON *obj = cJSON_CreateObject();
+  CmdResponse resp = CmdResponse_init_zero;
+  resp.id = rpc_request.id;
 
-  if (id->type == cJSON_Number) {
-    ESP_LOGI(TAG, "id=%i\n", id->valueint);
-
-    cJSON_AddNumberToObject(obj, "id", id->valueint);
-  }
-
-  if (method->type == cJSON_String && method->valuestring != NULL) {
-    ESP_LOGI(TAG, "method=%s\n", method->valuestring);
-    if (command_map(method->valuestring)) {
-      cJSON_AddStringToObject(obj, "message", "ok");
-      cJSON_AddBoolToObject(obj, "successful", true);
-    } else {
-      cJSON_AddStringToObject(obj, "message", "command not found");
-    }
-  }
-
-  char *response_data = cJSON_Print(obj);
-
-  cJSON_Delete(json);
+  uint8_t resp_buf[120];
+  pb_ostream_t ostream = pb_ostream_from_buffer(resp_buf, sizeof(resp_buf));
+  pb_encode(&ostream, CmdResponse_fields, &resp);
 
   unsigned char buf[3];
   coap_add_option(response, COAP_OPTION_CONTENT_TYPE,
-                  coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_JSON), buf);
-  coap_add_data(response, strlen(response_data), (const unsigned char *) response_data);
-  coap_send(ctx, local_interface, peer, response);
-
-  free(response_data);
-  cJSON_Delete(obj);
+                  coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_OCTET_STREAM), buf);
+  coap_add_data(response, ostream.bytes_written, resp_buf);
 }
 
 static void hnd_roomba_cmd_get(coap_context_t *ctx, struct coap_resource_t *resource,
@@ -85,18 +100,17 @@ static void hnd_roomba_cmd_get(coap_context_t *ctx, struct coap_resource_t *reso
                                coap_pdu_t *request, str *token, coap_pdu_t *response) {
   ESP_LOGI(TAG, "hnd_roomba_cmd_get entered\n");
 
-  unsigned char buf[3];
-  cJSON *obj = cJSON_CreateObject();
-  cJSON_AddStringToObject(obj, "message", "use post to send commands");
-  char *response_data = cJSON_Print(obj);
+  CmdResponse cmd_resp = CmdResponse_init_zero;
+  cmd_resp.id = 0;
 
+  uint8_t resp_buf[120];
+  pb_ostream_t ostream = pb_ostream_from_buffer(resp_buf, sizeof(resp_buf));
+  pb_encode(&ostream, CmdResponse_fields, &cmd_resp);
+
+  unsigned char buf[3];
   coap_add_option(response, COAP_OPTION_CONTENT_TYPE,
                   coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_JSON), buf);
-  coap_add_data(response, strlen(response_data), (const unsigned char *) response_data);
-  coap_send(ctx, local_interface, peer, response);
-
-  free(response_data);
-  cJSON_Delete(obj);
+  coap_add_data(response, ostream.bytes_written, resp_buf);
 }
 
 void endpoint_task(void *pvParameter) {
