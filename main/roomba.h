@@ -67,6 +67,6 @@ typedef enum {
 } roomba_schedule_day_t;
 
 void roomba_init();
-void send_roomba_cmd(roomba_opcode_t op, ...);
+void send_roomba_cmd(roomba_opcode_t op, int8_t len, ...);
 
 #endif //ROOMBABRAIN_ROOMBA_H

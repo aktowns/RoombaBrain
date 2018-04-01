@@ -109,27 +109,19 @@ void roomba_init() {
   //xTaskCreate(roomba_uart_task, "roomba_uart_task", 2048, (void*)ROOMBA_UART, 12, NULL);
 }
 
-void send_roomba_cmd(roomba_opcode_t op, ...) {
+void send_roomba_cmd(roomba_opcode_t op, int8_t len, ...) {
   va_list ap;
 
   ESP_LOGI(TAG, "Sending command %s to roomba\n", opcodes[op].description);
-  //if (op == OP_DIGIT_LEDS_ASCII) {
-  //  uart_write_bytes(ROOMBA_UART, (const char *) &(opcodes[OP_FULL].opcode), 1);
-  //  vTaskDelay(1000 / portTICK_PERIOD_MS);
-  //}
-  uart_write_bytes(ROOMBA_UART, ((const char*)&opcodes[op].opcode), 1);
+  char bfr[len+1];
+  bfr[0] = opcodes[op].opcode;
 
-  if (op == OP_DIGIT_LEDS_ASCII) {
-    uart_write_bytes(ROOMBA_UART, "\x72\x73\x72\x73", 4);
-    vTaskDelay(1000 / portTICK_PERIOD_MS);
+  va_start(ap, len);
+  for (int8_t i = 1; i <= len; i++) {
+     char arg = (char)va_arg(ap, int);
+     bfr[i] = arg;
   }
-
-  va_start(ap, op);
-
-  //for (uint8_t i = 0; i < opcodes[op].nargs; i++) {
-  //  char arg = (char)va_arg(ap, int);
-  //  uart_write_bytes(ROOMBA_UART, &arg, 1);
-  //}
-
   va_end(ap);
+
+  uart_write_bytes(ROOMBA_UART, bfr, (size_t) (len + 1));
 }
