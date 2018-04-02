@@ -24,8 +24,68 @@ void handle_rpc_roomba_mode(ModeRequest *mode) {
   switch (mode->mode) {
     case ModeRequest_Mode_FULL:
       send_roomba_cmd(OP_FULL, 0);
+      break;
     case ModeRequest_Mode_SAFE:
       send_roomba_cmd(OP_SAFE, 0);
+      break;
+  }
+}
+
+void handle_rpc_roomba_clean(CleanRequest *clean) {
+  switch (clean->mode) {
+    case CleanRequest_CleanMode_CLEAN:
+      send_roomba_cmd(OP_CLEAN, 0);
+      break;
+    case CleanRequest_CleanMode_DOCK:
+      send_roomba_cmd(OP_SEEK_DOCK, 0);
+      break;
+    case CleanRequest_CleanMode_MAX:
+      send_roomba_cmd(OP_MAX, 0);
+      break;
+    case CleanRequest_CleanMode_SPOT:
+      send_roomba_cmd(OP_SPOT, 0);
+      break;
+  }
+}
+
+void handle_rpc_roomba_baud(BaudRequest* baud) {
+  switch (baud->rate) {
+    case BaudRequest_BaudRate_BAUD_300:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_300);
+      break;
+    case BaudRequest_BaudRate_BAUD_600:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_600);
+      break;
+    case BaudRequest_BaudRate_BAUD_1200:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_1200);
+      break;
+    case BaudRequest_BaudRate_BAUD_2400:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_2400);
+      break;
+    case BaudRequest_BaudRate_BAUD_4800:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_4800);
+      break;
+    case BaudRequest_BaudRate_BAUD_9600:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_9600);
+      break;
+    case BaudRequest_BaudRate_BAUD_14400:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_14400);
+      break;
+    case BaudRequest_BaudRate_BAUD_19200:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_19200);
+      break;
+    case BaudRequest_BaudRate_BAUD_28800:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_28800);
+      break;
+    case BaudRequest_BaudRate_BAUD_38400:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_38400);
+      break;
+    case BaudRequest_BaudRate_BAUD_57600:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_57600);
+      break;
+    case BaudRequest_BaudRate_BAUD_115200:
+      send_roomba_cmd(OP_BAUD, 1, BAUD_115200);
+      break;
   }
 }
 
@@ -37,6 +97,15 @@ void handle_rpc_roomba(Roomba* roomba) {
     case Roomba_power_tag:
       send_roomba_cmd(OP_POWER, 0);
       break;
+    case Roomba_clean_tag:
+      handle_rpc_roomba_clean(&roomba->request.clean);
+      break;
+    case Roomba_start_tag:
+      send_roomba_cmd(OP_START, 0);
+      break;
+    case Roomba_baud_tag:
+      handle_rpc_roomba_baud(&roomba->request.baud);
+      break;
     default:
       ESP_LOGE(TAG, "Unhandled roomba rpc call: %i", roomba->which_request);
       break;
@@ -46,6 +115,12 @@ void handle_rpc_roomba(Roomba* roomba) {
 void handle_rpc_actuator(Actuator* actuator) {
   switch (actuator->which_request) {
     case Actuator_digital_leds_ascii_tag:
+      break;
+    case Actuator_drive_tag:
+      break;
+    case Actuator_drive_pwm_tag:
+      break;
+    case Actuator_direct_drive_tag:
       break;
     default:
       ESP_LOGE(TAG, "Unhandled actuator rpc call: %i", actuator->which_request);
