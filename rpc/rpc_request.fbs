@@ -1,0 +1,178 @@
+namespace RPC;
+
+enum BaudRate:uint8 {
+  Baud_300 = 0, Baud_600 = 1, Baud_1200 = 2, Baud_2400 = 3,
+  Baud_4800 = 4, Baud_9600 = 5, Baud_14400 = 6, Baud_19200 = 7,
+  Baud_28800 = 8, Baud_38400 = 9, Baud_57600 = 10, Baud_115200 = 11
+}
+enum RoombaMode:uint8 { Safe = 0, Full = 1 }
+enum CleanMode:uint8 { Clean = 0, Max = 1, Spot = 2, Dock = 3 }
+table ScheduleDay {
+    hour:uint8;
+    minute:uint8;
+}
+enum Day:uint8 {
+  Sunday = 0, Monday = 1, Tuesday = 2, Wednesday = 3, Thursday = 4, Friday = 5, Saturday = 6
+}
+
+table StartRequest {}
+table BaudRequest { rate:BaudRate; }
+table ModeRequest { mode:RoombaMode; }
+table CleanRequest { mode:CleanMode; }
+table ScheduleRequest {
+  sunday:Day;
+  monday:Day;
+  tuesday:Day;
+  wednesday:Day;
+  thursday:Day;
+  friday:Day;
+  saturday:Day;
+}
+table SetTimeRequest {
+  day:Day;
+  hour:uint8;
+  minute:uint8;
+}
+table PowerRequest {}
+
+//service Roomba {
+//    rpc Start(StartRequest) returns (CmdResponse);
+//    rpc Baud(BaudRequest) returns (CmdResponse);
+//    rpc Mode(ModeRequest) returns (CmdResponse);
+//    rpc Clean(CleanRequest) returns (CmdResponse);
+//    rpc Schedule(ScheduleRequest) returns (CmdResponse);
+//    rpc SetTime(SetTimeRequest) returns (CmdResponse);
+//    rpc Power(PowerRequest) returns (CmdResponse);
+//}
+union RoombaRequest {
+  StartRequest, BaudRequest, ModeRequest, CleanRequest, ScheduleRequest, SetTimeRequest,
+  PowerRequest
+}
+
+enum SideBrushDirection:byte { Clockwise = 0, CounterClockwise = 1 }
+enum MainBrushDirection:byte { Inward = 0, Outward = 1 }
+enum MotorState:byte { On = 0, Off = 1 }
+enum CommonLedState:uint8 { On = 0, Off = 1 }
+enum LedState:uint8 { On = 0, Off = 1 }
+enum ButtonState:uint8 { Push = 0, Release = 1 }
+table DigitLedSegment {
+  top:LedState;
+  top_left:LedState;
+  top_right:LedState;
+  middle:LedState;
+  bottom_left:LedState;
+  bottom_right:LedState;
+  bottom:LedState;
+}
+table SongNote {
+  number:uint8;
+  duration:uint8;
+}
+
+table DriveRequest {
+  velocity:int16;
+  radius:int16;
+}
+table DriveDirectRequest {
+  right_velocity:int16;
+  left_velocity:int16;
+}
+table DrivePWMRequest {
+  right_pwm:int16;
+  left_pwm:int16;
+}
+table MotorsRequest {
+  side_brush_direction:SideBrushDirection;
+  main_brush_direction:MainBrushDirection;
+  side_brush:MotorState;
+  vacuum:MotorState;
+  main_brush:MotorState;
+}
+table MotorsPWMRequest {
+  main_brush_pwm:int8;
+  side_brush_pwm:int8;
+  vacuum_pwm:int8;
+}
+table LEDsRequest {
+  debris:CommonLedState;
+  spot:CommonLedState;
+  dock:CommonLedState;
+  check_robot:CommonLedState;
+  clean_power_colour:uint8;
+  clean_power_intensity:uint8;
+}
+table SchedulingLEDsRequest {
+  saturday:LedState;
+  sunday:LedState;
+  monday:LedState;
+  tuesday:LedState;
+  wednesday:LedState;
+  thursday:LedState;
+  friday:LedState;
+  schedule:LedState;
+  clock:LedState;
+  am:LedState;
+  pm:LedState;
+  colon:LedState;
+}
+table DigitLEDsRequest {
+  one:DigitLedSegment;
+  two:DigitLedSegment;
+  three:DigitLedSegment;
+  four:DigitLedSegment;
+}
+table DigitLEDsAsciiRequest {
+  message:string;
+}
+table ButtonsRequest {
+  clean:ButtonState;
+  spot:ButtonState;
+  dock:ButtonState;
+  minute:ButtonState;
+  hour:ButtonState;
+  day:ButtonState;
+  schedule:ButtonState;
+  clock:ButtonState;
+}
+table SongRequest {
+  song_number:uint8;
+  notes:[SongNote];
+}
+table PlayRequest {
+  song_number:uint8;
+}
+
+// service Actuator {
+//     rpc Drive(DriveRequest) returns (CmdResponse);
+//     rpc DriveDirect(DriveDirectRequest) returns (CmdResponse);
+//     rpc DrivePWM(DrivePWMRequest) returns (CmdResponse);
+//     rpc Motors(MotorsRequest) returns (CmdResponse);
+//     rpc MotorsPWM(MotorsPWMRequest) returns (CmdResponse);
+//     rpc LEDs(LEDsRequest) returns (CmdResponse);
+//     rpc SchedulingLEDs(SchedulingLEDsRequest) returns (CmdResponse);
+//     rpc DigitLEDsRaw(DigitLEDsRequest) returns (CmdResponse);
+//     rpc DigitLEDsAscii(DigitLEDsAsciiRequest) returns (CmdResponse);
+//     rpc Buttons(ButtonsRequest) returns (CmdResponse);
+//     rpc Song(SongRequest) returns (CmdResponse);
+//     rpc Play(PlayRequest) returns (CmdResponse);
+// }
+union ActuatorRequest {
+  DriveRequest, DriveDirectRequest, DrivePWMRequest, MotorsRequest, MotorsPWMRequest,
+  LEDsRequest, SchedulingLEDsRequest, DigitLEDsRequest, DigitLEDsAsciiRequest,
+  ButtonsRequest, SongRequest, PlayRequest
+}
+
+union RequestUnion {
+  StartRequest, BaudRequest, ModeRequest, CleanRequest, ScheduleRequest, SetTimeRequest,
+  PowerRequest,
+  DriveRequest, DriveDirectRequest, DrivePWMRequest, MotorsRequest, MotorsPWMRequest,
+  LEDsRequest, SchedulingLEDsRequest, DigitLEDsRequest, DigitLEDsAsciiRequest,
+  ButtonsRequest, SongRequest, PlayRequest
+}
+
+table Request {
+  id:uint8;
+  request:RequestUnion;
+}
+
+root_type Request;

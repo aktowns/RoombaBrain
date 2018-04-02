@@ -1,0 +1,8 @@
+namespace RPC;
+
+table Response {
+    id:uint8;
+    result:string;
+}
+
+root_type Response;

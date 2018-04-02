@@ -17,6 +17,7 @@
 #include "rpc/roomba.pb.h"
 #include <pb_encode.h>
 #include <pb_decode.h>
+#include "rpc/rpc_request_reader.h"
 
 static const char *TAG = "endpoint";
 
