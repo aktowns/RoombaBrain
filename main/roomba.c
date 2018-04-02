@@ -18,35 +18,35 @@ static const char *TAG = "roomba";
 QueueHandle_t roomba_queue;
 
 const opcode_t opcodes[255] = {
-    [OP_START]            {.opcode = 128, .nargs =  0, .description = "start"                    },
-    [OP_RESET]            {.opcode =   7, .nargs =  0, .description = "reset"                    },
-    [OP_STOP]             {.opcode = 173, .nargs =  0, .description = "stop"                     },
-    [OP_BAUD]             {.opcode = 129, .nargs =  1, .description = "baud"                     },
-    [OP_SAFE]             {.opcode = 131, .nargs =  0, .description = "mode/safe"                },
-    [OP_FULL]             {.opcode = 132, .nargs =  0, .description = "mode/full"                },
-    [OP_CLEAN]            {.opcode = 135, .nargs =  0, .description = "clean/clean"              },
-    [OP_MAX]              {.opcode = 136, .nargs =  0, .description = "clean/max"                },
-    [OP_SPOT]             {.opcode = 134, .nargs =  0, .description = "clean/spot"               },
-    [OP_SEEK_DOCK]        {.opcode = 143, .nargs =  0, .description = "clean/dock"               },
-    [OP_SCHEDULE]         {.opcode = 167, .nargs = 15, .description = "clean/schedule"           },
-    [OP_SETTIME]          {.opcode = 168, .nargs =  3, .description = "clean/settime"            },
-    [OP_POWER]            {.opcode = 133, .nargs =  0, .description = "clean/power"              },
-    [OP_DRIVE]            {.opcode = 137, .nargs =  4, .description = "actuator/drive"           },
-    [OP_DRIVE_DIRECT]     {.opcode = 145, .nargs =  4, .description = "actuator/drive_direct"    },
-    [OP_DRIVE_PWM]        {.opcode = 146, .nargs =  4, .description = "actuator/drive_pwm"       },
-    [OP_MOTORS]           {.opcode = 138, .nargs =  1, .description = "actuator/motors"          },
-    [OP_MOTORS_PWM]       {.opcode = 144, .nargs =  3, .description = "actuator/motors_pwm"      },
-    [OP_LEDS]             {.opcode = 139, .nargs =  3, .description = "actuator/leds"            },
-    [OP_SCHEDULE_LEDS]    {.opcode = 162, .nargs =  2, .description = "actuator/schedule_leds"   },
-    [OP_DIGIT_LEDS]       {.opcode = 163, .nargs =  4, .description = "actuator/digit_leds"      },
+    [OP_START]            {.opcode = 128, .nargs =  0, .description = "start"},
+    [OP_RESET]            {.opcode =   7, .nargs =  0, .description = "reset"},
+    [OP_STOP]             {.opcode = 173, .nargs =  0, .description = "stop"},
+    [OP_BAUD]             {.opcode = 129, .nargs =  1, .description = "baud"},
+    [OP_SAFE]             {.opcode = 131, .nargs =  0, .description = "mode/safe"},
+    [OP_FULL]             {.opcode = 132, .nargs =  0, .description = "mode/full"},
+    [OP_CLEAN]            {.opcode = 135, .nargs =  0, .description = "clean/clean"},
+    [OP_MAX]              {.opcode = 136, .nargs =  0, .description = "clean/max"},
+    [OP_SPOT]             {.opcode = 134, .nargs =  0, .description = "clean/spot"},
+    [OP_SEEK_DOCK]        {.opcode = 143, .nargs =  0, .description = "clean/dock"},
+    [OP_SCHEDULE]         {.opcode = 167, .nargs = 15, .description = "clean/schedule"},
+    [OP_SETTIME]          {.opcode = 168, .nargs =  3, .description = "clean/settime"},
+    [OP_POWER]            {.opcode = 133, .nargs =  0, .description = "clean/power"},
+    [OP_DRIVE]            {.opcode = 137, .nargs =  4, .description = "actuator/drive"},
+    [OP_DRIVE_DIRECT]     {.opcode = 145, .nargs =  4, .description = "actuator/drive_direct"},
+    [OP_DRIVE_PWM]        {.opcode = 146, .nargs =  4, .description = "actuator/drive_pwm"},
+    [OP_MOTORS]           {.opcode = 138, .nargs =  1, .description = "actuator/motors"},
+    [OP_MOTORS_PWM]       {.opcode = 144, .nargs =  3, .description = "actuator/motors_pwm"},
+    [OP_LEDS]             {.opcode = 139, .nargs =  3, .description = "actuator/leds"},
+    [OP_SCHEDULE_LEDS]    {.opcode = 162, .nargs =  2, .description = "actuator/schedule_leds"},
+    [OP_DIGIT_LEDS]       {.opcode = 163, .nargs =  4, .description = "actuator/digit_leds"},
     [OP_DIGIT_LEDS_ASCII] {.opcode = 164, .nargs =  4, .description = "actuator/digit_leds_ascii"},
-    [OP_BUTTONS]          {.opcode = 165, .nargs =  1, .description = "actuator/buttons"         },
-    [OP_SONG]             {.opcode = 140, .nargs = -1, .description = "actuator/song"            },
-    [OP_PLAY]             {.opcode = 141, .nargs =  1, .description = "actuator/play"            },
-    [OP_SENSORS]          {.opcode = 142, .nargs =  1, .description = "input/sensors"            },
-    [OP_QUERY_LIST]       {.opcode = 149, .nargs = -1, .description = "input/query_list"         },
-    [OP_STREAM]           {.opcode = 148, .nargs = -1, .description = "input/stream"             },
-    [OP_PAUSE]            {.opcode = 150, .nargs =  1, .description = "input/pause"              }
+    [OP_BUTTONS]          {.opcode = 165, .nargs =  1, .description = "actuator/buttons"},
+    [OP_SONG]             {.opcode = 140, .nargs = -1, .description = "actuator/song"},
+    [OP_PLAY]             {.opcode = 141, .nargs =  1, .description = "actuator/play"},
+    [OP_SENSORS]          {.opcode = 142, .nargs =  1, .description = "input/sensors"},
+    [OP_QUERY_LIST]       {.opcode = 149, .nargs = -1, .description = "input/query_list"},
+    [OP_STREAM]           {.opcode = 148, .nargs = -1, .description = "input/stream"},
+    [OP_PAUSE]            {.opcode = 150, .nargs =  1, .description = "input/pause"}
 };
 
 void roomba_uart_task(void *pvParameters UNUSED) {
@@ -55,7 +55,7 @@ void roomba_uart_task(void *pvParameters UNUSED) {
   //uint8_t* dtmp = (uint8_t*)malloc(BUF_SIZE);
 
   forever {
-    if (xQueueReceive(roomba_queue, (void*)&event, (portTickType)portMAX_DELAY)) {
+    if (xQueueReceive(roomba_queue, (void *) &event, (portTickType) portMAX_DELAY)) {
       ESP_LOGI(TAG, "roomba uart event:");
       switch (event.type) {
         case UART_DATA:
@@ -114,13 +114,13 @@ void send_roomba_cmd(roomba_opcode_t op, int8_t len, ...) {
   va_list ap;
 
   ESP_LOGI(TAG, "Sending command %s to roomba\n", opcodes[op].description);
-  char bfr[len+1];
+  char bfr[len + 1];
   bfr[0] = opcodes[op].opcode;
 
   va_start(ap, len);
   for (int8_t i = 1; i <= len; i++) {
-     char arg = (char)va_arg(ap, int);
-     bfr[i] = arg;
+    char arg = (char) va_arg(ap, int);
+    bfr[i] = arg;
   }
   va_end(ap);
 

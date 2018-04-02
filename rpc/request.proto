@@ -2,7 +2,8 @@ syntax = "proto3";
 package RPC;
 
 
-message StartRequest {}
+message StartRequest {
+}
 message BaudRequest {
     enum BaudRate {
         BAUD_300 = 0;
@@ -22,7 +23,10 @@ message BaudRequest {
 }
 
 message ModeRequest {
-    enum Mode { SAFE = 0; FULL = 1; }
+    enum Mode {
+        SAFE = 0;
+        FULL = 1;
+    }
 
     Mode mode = 1;
 }
@@ -39,8 +43,8 @@ message CleanRequest {
 
 message ScheduleRequest {
     message Day {
-       uint32 hour = 1;
-       uint32 minute = 2;
+        uint32 hour = 1;
+        uint32 minute = 2;
     }
 
     Day sunday = 1;
@@ -67,7 +71,8 @@ message SetTimeRequest {
     uint32 minute = 3;
 }
 
-message PowerRequest {}
+message PowerRequest {
+}
 
 //service Roomba {
 //    rpc Start(StartRequest) returns (CmdResponse);
@@ -106,9 +111,18 @@ message DrivePWMRequest {
 }
 
 message MotorsRequest {
-    enum SideBrushDirection { CLOCKWISE = 0; COUNTERCLOCKWISE = 1; }
-    enum MainBrushDirection { INWARD = 0; OUTWARD = 1; }
-    enum MotorState { ON = 0; OFF = 1; }
+    enum SideBrushDirection {
+        CLOCKWISE = 0;
+        COUNTERCLOCKWISE = 1;
+    }
+    enum MainBrushDirection {
+        INWARD = 0;
+        OUTWARD = 1;
+    }
+    enum MotorState {
+        ON = 0;
+        OFF = 1;
+    }
 
     SideBrushDirection side_brush_direction = 1;
     MainBrushDirection main_brush_direction = 2;
@@ -124,18 +138,24 @@ message MotorsPWMRequest {
 }
 
 message LEDsRequest {
-    enum CommonLedState { ON = 0; OFF = 1; }
+    enum CommonLedState {
+        ON = 0;
+        OFF = 1;
+    }
 
     CommonLedState debris = 1;
-    CommonLedState spot   = 2;
-    CommonLedState dock   = 3;
+    CommonLedState spot = 2;
+    CommonLedState dock = 3;
     CommonLedState check_robot = 4;
     uint32 clean_power_colour = 5;
     uint32 clean_power_intensity = 6;
 }
 
 message SchedulingLEDsRequest {
-    enum LedState { ON = 0; OFF = 1; }
+    enum LedState {
+        ON = 0;
+        OFF = 1;
+    }
 
     LedState saturday = 1;
     LedState sunday = 2;
@@ -152,7 +172,10 @@ message SchedulingLEDsRequest {
 }
 
 message DigitLEDsRequest {
-    enum LedState { ON = 0; OFF = 1; }
+    enum LedState {
+        ON = 0;
+        OFF = 1;
+    }
 
     message LedSegment {
         LedState top = 1;
@@ -175,7 +198,10 @@ message DigitLEDsAsciiRequest {
 }
 
 message ButtonsRequest {
-    enum ButtonState { PUSH = 0; RELEASE = 1; }
+    enum ButtonState {
+        PUSH = 0;
+        RELEASE = 1;
+    }
 
     ButtonState clean = 1;
     ButtonState spot = 2;
