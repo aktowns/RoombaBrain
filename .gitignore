@@ -1,5 +1,3 @@
-.pioenvs
-.piolibdeps
 .vscode
 .idea
 CMakeListsGenerated.txt
