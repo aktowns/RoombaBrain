@@ -1,9 +1,6 @@
 syntax = "proto3";
+package RPC;
 
-message CmdResponse {
-    uint32 id = 1;
-    string result = 2;
-}
 
 message StartRequest {}
 message BaudRequest {
@@ -25,10 +22,8 @@ message BaudRequest {
 }
 
 message ModeRequest {
-    enum Mode {
-        SAFE = 0;
-        FULL = 1;
-    }
+    enum Mode { SAFE = 0; FULL = 1; }
+
     Mode mode = 1;
 }
 
@@ -111,18 +106,10 @@ message DrivePWMRequest {
 }
 
 message MotorsRequest {
-    enum SideBrushDirection {
-        CLOCKWISE = 0;
-        COUNTERCLOCKWISE = 1;
-    }
-    enum MainBrushDirection {
-        INWARD = 0;
-        OUTWARD = 1;
-    }
-    enum MotorState {
-        ON = 0;
-        OFF = 1;
-    }
+    enum SideBrushDirection { CLOCKWISE = 0; COUNTERCLOCKWISE = 1; }
+    enum MainBrushDirection { INWARD = 0; OUTWARD = 1; }
+    enum MotorState { ON = 0; OFF = 1; }
+
     SideBrushDirection side_brush_direction = 1;
     MainBrushDirection main_brush_direction = 2;
     MotorState side_brush = 3;
@@ -137,10 +124,7 @@ message MotorsPWMRequest {
 }
 
 message LEDsRequest {
-    enum CommonLedState {
-        ON = 0;
-        OFF = 1;
-    }
+    enum CommonLedState { ON = 0; OFF = 1; }
 
     CommonLedState debris = 1;
     CommonLedState spot   = 2;
@@ -151,10 +135,8 @@ message LEDsRequest {
 }
 
 message SchedulingLEDsRequest {
-    enum LedState {
-        ON = 0;
-        OFF = 1;
-    }
+    enum LedState { ON = 0; OFF = 1; }
+
     LedState saturday = 1;
     LedState sunday = 2;
     LedState monday = 3;
@@ -170,10 +152,8 @@ message SchedulingLEDsRequest {
 }
 
 message DigitLEDsRequest {
-    enum LedState {
-        ON = 0;
-        OFF = 1;
-    }
+    enum LedState { ON = 0; OFF = 1; }
+
     message LedSegment {
         LedState top = 1;
         LedState top_left = 2;
@@ -195,10 +175,7 @@ message DigitLEDsAsciiRequest {
 }
 
 message ButtonsRequest {
-    enum ButtonState {
-        PUSH = 0;
-        RELEASE = 1;
-    }
+    enum ButtonState { PUSH = 0; RELEASE = 1; }
 
     ButtonState clean = 1;
     ButtonState spot = 2;
@@ -255,7 +232,7 @@ message Actuator {
     }
 }
 
-message RPCRequest {
+message Request {
     uint32 id = 1;
     oneof request {
         Roomba roomba = 2;
