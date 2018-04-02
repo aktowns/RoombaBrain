@@ -4,3 +4,7 @@
 .idea
 CMakeListsGenerated.txt
 cmake-build-debug
+build
+main/rpc
+sdkconfig
+.envrc
