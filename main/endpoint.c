@@ -157,9 +157,11 @@ void handle_rpc_request(RPC_Request *rpc_request) {
   }
 }
 
-static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *resource,
-                                const coap_endpoint_t *local_interface, coap_address_t *peer,
-                                coap_pdu_t *request, str *token, coap_pdu_t *response) {
+static void hnd_roomba_cmd_post(coap_context_t *ctx UNUSED,
+                                struct coap_resource_t *resource UNUSED,
+                                const coap_endpoint_t *local_interface UNUSED,
+                                coap_address_t *peer UNUSED,
+                                coap_pdu_t *request, str *token UNUSED, coap_pdu_t *response) {
   ESP_LOGI(TAG, "hnd_roomba_cmd_post entered\n");
 
   size_t size;
@@ -185,9 +187,11 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx, struct coap_resource_t *res
   coap_add_data(response, ostream.bytes_written, resp_buf);
 }
 
-static void hnd_roomba_cmd_get(coap_context_t *ctx, struct coap_resource_t *resource,
-                               const coap_endpoint_t *local_interface, coap_address_t *peer,
-                               coap_pdu_t *request, str *token, coap_pdu_t *response) {
+static void hnd_roomba_cmd_get(coap_context_t *ctx UNUSED, struct coap_resource_t *resource UNUSED,
+                               const coap_endpoint_t *local_interface UNUSED,
+                               coap_address_t *peer UNUSED,
+                               coap_pdu_t *request UNUSED, str *token UNUSED,
+                               coap_pdu_t *response) {
   ESP_LOGI(TAG, "hnd_roomba_cmd_get entered\n");
 
   RPC_Response cmd_resp = RPC_Response_init_zero;
@@ -203,14 +207,14 @@ static void hnd_roomba_cmd_get(coap_context_t *ctx, struct coap_resource_t *reso
   coap_add_data(response, ostream.bytes_written, resp_buf);
 }
 
-void endpoint_task(void *pvParameter) {
+void endpoint_task(void *pvParameter UNUSED) {
   coap_context_t *ctx = NULL;
   coap_address_t serv_addr;
   fd_set readfds;
   struct timeval tv;
   int flags = 0;
 
-  while (1) {
+  forever {
     wifi_wait_active();
     ESP_LOGI(TAG, "coap thread woken");
 

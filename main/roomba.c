@@ -8,6 +8,7 @@
 #include <driver/gpio.h>
 
 #include "roomba.h"
+#include "utils.h"
 
 #define ROOMBA_UART UART_NUM_1
 #define BUF_SIZE 1024
@@ -48,12 +49,12 @@ const opcode_t opcodes[255] = {
     [OP_PAUSE]            {.opcode = 150, .nargs =  1, .description = "input/pause"              }
 };
 
-void roomba_uart_task(void *pvParameters) {
+void roomba_uart_task(void *pvParameters UNUSED) {
   uart_event_t event;
   size_t buffered_size;
   //uint8_t* dtmp = (uint8_t*)malloc(BUF_SIZE);
 
-  for (;;) {
+  forever {
     if (xQueueReceive(roomba_queue, (void*)&event, (portTickType)portMAX_DELAY)) {
       ESP_LOGI(TAG, "roomba uart event:");
       switch (event.type) {

@@ -6,6 +6,7 @@
 #include <esp_system.h>
 #include <esp_log.h>
 #include <esp_event.h>
+#include "utils.h"
 
 static const char *TAG = "wifi";
 
@@ -13,7 +14,7 @@ const int WIFI_CONNECTED_BIT = BIT0;
 
 static EventGroupHandle_t wifi_event_group;
 
-static esp_err_t wifi_event_handler(void *ctx, system_event_t *event) {
+static esp_err_t wifi_event_handler(void *ctx UNUSED, system_event_t *event) {
   switch (event->event_id) {
     case SYSTEM_EVENT_STA_START:
       ESP_LOGI(TAG, "wifi start");

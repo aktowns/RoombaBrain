@@ -44,7 +44,7 @@ typedef enum {
 typedef enum {
   BAUD_300   = 0,
   BAUD_600   = 1,
-  BADD_1200  = 2,
+  BAUD_1200  = 2,
   BAUD_2400  = 3,
   BAUD_4800  = 4,
   BAUD_9600  = 5,
