@@ -105,12 +105,18 @@ void handle_rpc_roomba(RPC_Roomba *roomba) {
   }
 }
 
+#define HI(x) (x >> 8)
+#define LO(x) (x & 0xFF)
+
 void handle_rpc_actuator(RPC_Actuator *actuator) {
   switch (actuator->which_request) {
     case RPC_Actuator_digital_leds_ascii_tag:
       break;
-    case RPC_Actuator_drive_tag:
+    case RPC_Actuator_drive_tag: {
+      RPC_DriveRequest drive = actuator->request.drive;
+      send_roomba_cmd(OP_DRIVE, 4, HI(drive.velocity), LO(drive.velocity), HI(drive.radius), LO(drive.radius));
       break;
+    }
     case RPC_Actuator_drive_pwm_tag:
       break;
     case RPC_Actuator_direct_drive_tag:
@@ -124,6 +130,7 @@ void handle_rpc_actuator(RPC_Actuator *actuator) {
     case RPC_Actuator_digital_leds_tag:
       break;
     case RPC_Actuator_play_tag:
+      send_roomba_cmd(OP_PLAY, 1, (uint8_t)actuator->request.play.song_number);
       break;
     case RPC_Actuator_song_tag:
       break;
