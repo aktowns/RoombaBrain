@@ -40,6 +40,8 @@ static void hnd_roomba_cmd_post(coap_context_t *ctx UNUSED,
   coap_add_option(response, COAP_OPTION_CONTENT_TYPE,
                   coap_encode_var_bytes(buf, COAP_MEDIATYPE_APPLICATION_OCTET_STREAM), buf);
   coap_add_data(response, out_size, resp_buf);
+
+  free(resp_buf);
 }
 
 static void hnd_roomba_cmd_get(coap_context_t *ctx UNUSED, struct coap_resource_t *resource UNUSED,
